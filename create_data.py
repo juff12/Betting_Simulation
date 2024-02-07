@@ -62,18 +62,24 @@ def gamble_sim_run(bal, sim_count, row_labels, col_labels, title, pascal):
     
     # function to create array of each bet repeated in sequence
     # ex: want to win 50 dollars, 5 inital bets would be [10,10,10,10,10]
-    bet_array = lambda col_label, row_label: np.asarray([bet_size(col_label, (1 / row_label)) for _ in range(0,row_label)], dtype=object)
+    bet_array = lambda col_label, row_label: np.asarray([bet_size(col_label, (1 / row_label))
+                                                         for _ in range(0,row_label)], dtype=object)
     # builds an array for functions with given data
-    data_bet_array = lambda col_label, pascal_arr: np.asarray([bet_size(col_label, data_elem / sum(pascal_arr)) for data_elem in pascal_arr], dtype=object)
+    data_bet_array = lambda col_label, pascal_arr: np.asarray([bet_size(col_label, data_elem / sum(pascal_arr))
+                                                               for data_elem in pascal_arr], dtype=object)
     # decides which which way to build the array
-    func_decider = lambda col_label, row_label, pascal: data_bet_array(col_label, func_pascal(row_label)) if pascal else bet_array(col_label, row_label)
+    func_decider = lambda col_label, row_label, pascal: data_bet_array(col_label, 
+                                                                       func_pascal(row_label)) if pascal else bet_array(col_label, row_label)
     # function to create a row of a TOTAL bet amount split into intervals of 2-10 inclusive
-    row_array = lambda row_label, pascal: np.asarray([func_decider(col_label, row_label, pascal) for col_label in col_labels], dtype=object)
+    row_array = lambda row_label, pascal: np.asarray([func_decider(col_label, row_label, pascal)
+                                                      for col_label in col_labels], dtype=object)
     # function to pad the rows with zeros so that each bet array has the same number of zeros as the max number of bets (10)
-    pad_row = lambda row_label, pascal: np.asarray([np.pad(arr, (0, max(row_labels)-row_label)) for arr in row_array(row_label, pascal)], dtype=object)
+    pad_row = lambda row_label, pascal: np.asarray([np.pad(arr, (0, max(row_labels)-row_label))
+                                                    for arr in row_array(row_label, pascal)], dtype=object)
     # sequence array seq_array[i] returns a (9x10) array of bets with bet counts sized from 2-10 (inclusive) for the i'th percentage of balance bet
     # ex seq_array[0] contains the bets that sum to a win of $50 (ie. 1000 * 0.05) spread over 2,3,4,5,6,7,8,9,10 bets. (there is an seperate arraay for each number of bets)
-    seq_array = np.stack(np.asarray([pad_row(row_label, pascal) for row_label in row_labels], dtype=object), axis=1)
+    seq_array = np.stack(np.asarray([pad_row(row_label, pascal)
+                                     for row_label in row_labels], dtype=object), axis=1)
 
     create_data(bal, sim_count, row_labels, col_labels, seq_array, title)
 
@@ -84,7 +90,8 @@ def create_data(bal, sim_count, row_labels, col_labels, seq_array, title):
     for index, percent_block in enumerate(seq_array):
         # runs the gamble_sim function 1000 times for each bet sequence saves the results to an array of 9000x2
         # 9000x2 array has a column for the number of bets to start and the ending balance
-        gamble_func = lambda p_block: [np.asarray([row_labels[i], gamble_sim(list(p_block[i]), bal)], dtype=object) for _ in range(0,sim_count) for i in range(0,len(row_labels))]
+        gamble_func = lambda p_block: [np.asarray([row_labels[i], gamble_sim(list(p_block[i]), bal)], dtype=object)
+                                       for _ in range(0,sim_count) for i in range(0,len(row_labels))]
         # stores and converts returned value from the gambling helper function
         data_percent = np.asarray(gamble_func(percent_block), dtype=object)
 
@@ -95,7 +102,8 @@ def normalize_data(data, bal, percent_array):
     max_len_row = max([len(row) for row in data])
     bet_size = lambda x, y: (bal * x) * y
     row_func = lambda row, percent: np.asarray([bet_size(percent, item) for item in row], dtype=object)
-    pad_func = lambda data, percent: np.asarray([np.pad(row_func(row, percent), (0, max_len_row-len(row))) for row in data], dtype=object)    
+    pad_func = lambda data, percent: np.asarray([np.pad(row_func(row, percent),
+                                                        (0, max_len_row-len(row))) for row in data], dtype=object)    
     return np.asarray([pad_func(data, percent) for percent in percent_array])
 
 
