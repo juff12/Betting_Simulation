@@ -62,26 +62,29 @@ def gamble_sim_run(bal, sim_count, row_labels, col_labels, title, pascal):
     
     # function to create array of each bet repeated in sequence
     # ex: want to win 50 dollars, 5 inital bets would be [10,10,10,10,10]
-    bet_array = lambda col_label, row_label: np.asarray([bet_size(col_label, (1 / row_label))
-                                                         for _ in range(0,row_label)], dtype=object)
+    bet_array = lambda c_labl,r_labl: np.asarray([bet_size(c_labl,(1/r_labl))
+                                                  for _ in range(0,r_labl)],dtype=object)
     # builds an array for functions with given data
-    data_bet_array = lambda col_label, pascal_arr: np.asarray([bet_size(col_label, data_elem / sum(pascal_arr))
-                                                               for data_elem in pascal_arr], dtype=object)
+    data_arr = lambda c_labl,pascal_arr: np.asarray([bet_size(c_labl,elem/sum(pascal_arr))
+                                                     for elem in pascal_arr],dtype=object)
     # decides which which way to build the array
-    func_decider = lambda col_label, row_label, pascal: data_bet_array(col_label, 
-                                                                       func_pascal(row_label)) if pascal else bet_array(col_label, row_label)
+    fn_dec = lambda c_labl,r_labl,pascal: data_arr(c_labl,
+                                                   func_pascal(r_labl)) if pascal else bet_array(c_labl,r_labl)
     # function to create a row of a TOTAL bet amount split into intervals of 2-10 inclusive
-    row_array = lambda row_label, pascal: np.asarray([func_decider(col_label, row_label, pascal)
-                                                      for col_label in col_labels], dtype=object)
-    # function to pad the rows with zeros so that each bet array has the same number of zeros as the max number of bets (10)
-    pad_row = lambda row_label, pascal: np.asarray([np.pad(arr, (0, max(row_labels)-row_label))
-                                                    for arr in row_array(row_label, pascal)], dtype=object)
-    # sequence array seq_array[i] returns a (9x10) array of bets with bet counts sized from 2-10 (inclusive) for the i'th percentage of balance bet
-    # ex seq_array[0] contains the bets that sum to a win of $50 (ie. 1000 * 0.05) spread over 2,3,4,5,6,7,8,9,10 bets. (there is an seperate arraay for each number of bets)
-    seq_array = np.stack(np.asarray([pad_row(row_label, pascal)
-                                     for row_label in row_labels], dtype=object), axis=1)
+    row_array = lambda r_labl,pascal: np.asarray([fn_dec(c_labl,r_labl,pascal)
+                                                  for c_labl in col_labels],dtype=object)
+    # function to pad the rows with zeros so that each bet array
+    # has the same number of zeros as the max number of bets (10)
+    pad_row = lambda r_labl,pascal: np.asarray([np.pad(arr,(0,max(row_labels)-r_labl))
+                                                 for arr in row_array(r_labl,pascal)],dtype=object)
+    # sequence array seq_array[i] returns a (9x10) array of bets with bet counts sized
+    # from 2-10 (inclusive) for the i'th percentage of balance bet
+    # ex seq_array[0] contains the bets that sum to a win of $50 (ie. 1000 * 0.05)
+    # spread over 2,3,4,5,6,7,8,9,10 bets. (there is an seperate arraay for each number of bets)
+    seq_array = np.stack(np.asarray([pad_row(r_labl,pascal)
+                                     for r_labl in row_labels],dtype=object), axis=1)
 
-    create_data(bal, sim_count, row_labels, col_labels, seq_array, title)
+    create_data(bal,sim_count,row_labels,col_labels,seq_array,title)
 
 
 
